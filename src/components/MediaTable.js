@@ -1,29 +1,10 @@
-import React, {useEffect, useState} from 'react';
-import {baseUrl} from '../utils/variables';
+import React from 'react';
+import {useMedia} from '../hooks/ApiHooks';
 // import PropTypes from 'prop-types';
 import MediaRow from './MediaRow';
 
 const MediaTable = () => {
-  const [mediaArray, setMediaArray] = useState([]);
-  const getMedia = async () => {
-    try {
-      const mediaResponse = await fetch(baseUrl + 'media');
-      const media = await mediaResponse.json();
-      const allFiles = await Promise.all(
-        media.map(async (file) => {
-          const fileResponse = await fetch(`${baseUrl}media/${file.file_id}`);
-          return await fileResponse.json();
-        })
-      );
-      setMediaArray(allFiles);
-    } catch (err) {
-      console.error(err.message);
-    }
-  };
-  useEffect(() => {
-    getMedia();
-  }, []);
-
+  const {mediaArray} = useMedia();
   console.log(mediaArray);
   return (
     <table>
