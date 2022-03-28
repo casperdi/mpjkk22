@@ -10,13 +10,16 @@ const registerForm = (props) => {
     full_name: '',
   };
 
-  const {postUser} = useUser();
+  const {postUser, getUserName} = useUser();
 
   const doRegister = async () => {
     console.log('skrrrt');
     try {
-      const userData = await postUser(inputs);
-      console.log(userData);
+      const checkUser = await getUserName(inputs.username);
+      if (checkUser) {
+        const userData = await postUser(inputs);
+        console.log(userData);
+      }
     } catch (error) {
       alert(error.message);
     }
