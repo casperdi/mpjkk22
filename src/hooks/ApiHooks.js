@@ -52,11 +52,7 @@ const useUser = () => {
 
   const getUserName = async (username) => {
     const checkUser = await fetchJson(baseUrl + 'users/username/' + username);
-    if (checkUser.available) {
-      return true;
-    } else {
-      throw new Error('username not available');
-    }
+    return checkUser.available;
   };
 
   const postUser = async (inputs) => {
