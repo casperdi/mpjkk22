@@ -5,14 +5,14 @@ import useForm from '../hooks/formHooks';
 import {Grid} from '@mui/material';
 import {Typography} from '@mui/material';
 import {Button} from '@mui/material';
-import {ValidatorForm} from 'react-material-ui-form-validator';
-import {TextValidator} from 'react-material-ui-form-validator';
+import {ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import {useEffect} from 'react';
 
 const RegisterForm = (props) => {
   const alkuarvot = {
     username: '',
     password: '',
+    confirm: '',
     email: '',
     full_name: '',
   };
@@ -20,19 +20,19 @@ const RegisterForm = (props) => {
   const validators = {
     username: ['required', 'minStringLength: 3', 'isAvailable'],
     password: ['required', 'minStringLength: 5'],
+    confirm: ['required', 'isPasswordMatch'],
     email: ['required', 'isEmail'],
-    full_name: ['minStringLength: 3'],
   };
 
   const errorMessages = {
     username: [
       'required field',
       'minimum 3 characters',
-      'username not available',
+      'usename not available',
     ],
     password: ['required field', 'minimum 5 characters'],
-    email: ['required field', 'must be valid email'],
-    full_name: ['minimum 3 characters'],
+    confirm: ['required field', 'passwords do not match'],
+    email: ['required field', 'not email address'],
   };
 
   const {postUser, getUsername} = useUser();
@@ -42,6 +42,7 @@ const RegisterForm = (props) => {
     try {
       const checkUser = getUsername(inputs.username);
       if (checkUser) {
+        delete inputs.confirm;
         const userData = await postUser(inputs);
         console.log(userData);
       }
@@ -54,7 +55,6 @@ const RegisterForm = (props) => {
     doRegister,
     alkuarvot
   );
-  console.log(inputs);
 
   useEffect(() => {
     ValidatorForm.addValidationRule('isAvailable', async (value) => {
@@ -64,7 +64,22 @@ const RegisterForm = (props) => {
         return true;
       }
     });
-  }, []);
+
+    ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
+      /*
+      if (value !== inputs.password) {
+        return false;
+      }
+      return true;
+      */
+      console.log('validator', value, inputs.password);
+      return value === inputs.password ? true : false;
+    });
+
+    return () => {
+      ValidatorForm.removeValidationRule('isAvailable');
+    };
+  }, [inputs]);
 
   return (
     <Grid container>
@@ -99,6 +114,17 @@ const RegisterForm = (props) => {
           />
           <TextValidator
             fullWidth
+            label="re-type password"
+            placeholder="re-type password"
+            name="confirm"
+            type="confirm"
+            onChange={handleInputChange}
+            value={inputs.confirm}
+            validators={validators.confirm}
+            errorMessages={errorMessages.confirm}
+          />
+          <TextValidator
+            fullWidth
             label="email"
             placeholder="email"
             name="email"
@@ -115,8 +141,6 @@ const RegisterForm = (props) => {
             name="full_name"
             onChange={handleInputChange}
             value={inputs.full_name}
-            validators={validators.full_name}
-            errorMessages={errorMessages.full_name}
           />
           <Button fullWidth color="primary" type="submit" variant="contained">
             Register
