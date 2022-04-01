@@ -4,8 +4,10 @@ import {useUser} from '../hooks/ApiHooks';
 import useForm from '../hooks/formHooks';
 import {Grid} from '@mui/material';
 import {Typography} from '@mui/material';
-import {TextField} from '@mui/material';
 import {Button} from '@mui/material';
+import {ValidatorForm} from 'react-material-ui-form-validator';
+import {TextValidator} from 'react-material-ui-form-validator';
+import {useEffect} from 'react';
 
 const RegisterForm = (props) => {
   const alkuarvot = {
@@ -15,16 +17,30 @@ const RegisterForm = (props) => {
     full_name: '',
   };
 
-  const {postUser, getUsername} = useUser();
-
-  const doCheck = async () => {
-    return await getUsername(inputs.username);
+  const validators = {
+    username: ['required', 'minStringLength: 3', 'isAvailable'],
+    password: ['required', 'minStringLength: 5'],
+    email: ['required', 'isEmail'],
+    full_name: ['minStringLength: 3'],
   };
+
+  const errorMessages = {
+    username: [
+      'required field',
+      'minimum 3 characters',
+      'username not available',
+    ],
+    password: ['required field', 'minimum 5 characters'],
+    email: ['required field', 'must be valid email'],
+    full_name: ['minimum 3 characters'],
+  };
+
+  const {postUser, getUsername} = useUser();
 
   const doRegister = async () => {
     console.log('doRegister');
     try {
-      const checkUser = await doCheck();
+      const checkUser = getUsername(inputs.username);
       if (checkUser) {
         const userData = await postUser(inputs);
         console.log(userData);
@@ -40,6 +56,16 @@ const RegisterForm = (props) => {
   );
   console.log(inputs);
 
+  useEffect(() => {
+    ValidatorForm.addValidationRule('isAvailable', async () => {
+      try {
+        return await getUsername(inputs.username);
+      } catch (err) {
+        return false;
+      }
+    });
+  }, []);
+
   return (
     <Grid container>
       <Grid item xs={12}>
@@ -49,16 +75,18 @@ const RegisterForm = (props) => {
       </Grid>
 
       <Grid item xs={12}>
-        <form onSubmit={handleSubmit}>
-          <TextField
+        <ValidatorForm onSubmit={handleSubmit}>
+          <TextValidator
             fullWidth
             placeholder="username"
             label="username"
             name="username"
             onChange={handleInputChange}
             value={inputs.username}
+            validators={validators.username}
+            errorMessages={errorMessages.username}
           />
-          <TextField
+          <TextValidator
             fullWidth
             label="password"
             placeholder="password"
@@ -66,8 +94,10 @@ const RegisterForm = (props) => {
             type="password"
             onChange={handleInputChange}
             value={inputs.password}
+            validators={validators.password}
+            errorMessages={errorMessages.password}
           />
-          <TextField
+          <TextValidator
             fullWidth
             label="email"
             placeholder="email"
@@ -75,19 +105,23 @@ const RegisterForm = (props) => {
             type="email"
             onChange={handleInputChange}
             value={inputs.email}
+            validators={validators.email}
+            errorMessages={errorMessages.email}
           />
-          <TextField
+          <TextValidator
             fullWidth
             label="full name"
             placeholder="full name"
             name="full_name"
             onChange={handleInputChange}
             value={inputs.full_name}
+            validators={validators.full_name}
+            errorMessages={errorMessages.full_name}
           />
           <Button fullWidth color="primary" type="submit" variant="contained">
-            Login
+            Register
           </Button>
-        </form>
+        </ValidatorForm>
       </Grid>
     </Grid>
   );
