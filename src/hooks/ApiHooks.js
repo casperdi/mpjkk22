@@ -57,22 +57,6 @@ const useMedia = () => {
     }
   };
 
-  const postTag = async (inputs, token) => {
-    try {
-      setLoading(true);
-      const fetchOptions = {
-        method: 'POST',
-        headers: {
-          'x-access-token': token,
-        },
-        body: JSON.stringify(inputs),
-      };
-      return await fetchJson(baseUrl + 'media', fetchOptions);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return {mediaArray, postMedia, loading};
 };
 
@@ -128,7 +112,17 @@ const useTag = () => {
       throw new Error('No results');
     }
   };
-  return {getTag};
+  const postTag = async (fileId, tag, token) => {
+    const fetchOptions = {
+      method: 'POST',
+      headers: {
+        'x-access-token': token,
+      },
+      body: JSON.stringify(),
+    };
+    return await fetchJson(baseUrl + 'media', fetchOptions);
+  };
+  return {getTag, postTag};
 };
 
 export {useMedia, useLogin, useUser, useTag};

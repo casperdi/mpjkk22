@@ -11,6 +11,7 @@ const Upload = () => {
     description: '',
   };
   const {postMedia, loading} = useMedia();
+  const {postTag} =
   const navigate = useNavigate();
 
   const doUpload = async () => {
@@ -22,6 +23,7 @@ const Upload = () => {
       formdata.append('description', inputs.description);
       formdata.append('file', inputs.file);
       const mediaData = await postMedia(formdata, token);
+      const tagData = await await postTag({file_id: })
       confirm(mediaData.message) && navigate('/home');
     } catch (err) {
       alert(err.message);
