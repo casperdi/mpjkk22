@@ -19,8 +19,10 @@ const fetchJson = async (url, options = {}) => {
 
 const useMedia = () => {
   const [mediaArray, setMediaArray] = useState([]);
+  const [loading, setLoading] = useState(false);
   const getMedia = async () => {
     try {
+      setLoading(true);
       const media = await fetchJson(baseUrl + 'media');
       const allFiles = await Promise.all(
         media.map(async (file) => {
@@ -30,6 +32,8 @@ const useMedia = () => {
       setMediaArray(allFiles);
     } catch (err) {
       alert(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,7 +41,39 @@ const useMedia = () => {
     getMedia();
   }, []);
 
-  return {mediaArray};
+  const postMedia = async (formdata, token) => {
+    try {
+      setLoading(true);
+      const fetchOptions = {
+        method: 'POST',
+        headers: {
+          'x-access-token': token,
+        },
+        body: formdata,
+      };
+      return await fetchJson(baseUrl + 'media', fetchOptions);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const postTag = async (inputs, token) => {
+    try {
+      setLoading(true);
+      const fetchOptions = {
+        method: 'POST',
+        headers: {
+          'x-access-token': token,
+        },
+        body: JSON.stringify(inputs),
+      };
+      return await fetchJson(baseUrl + 'media', fetchOptions);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {mediaArray, postMedia, loading};
 };
 
 const useUser = () => {
@@ -50,7 +86,7 @@ const useUser = () => {
     return await fetchJson(baseUrl + 'users/user', fetchOptions);
   };
 
-  const getUserName = async (username) => {
+  const getUsername = async (username) => {
     const checkUser = await fetchJson(baseUrl + 'users/username/' + username);
     return checkUser.available;
   };
@@ -66,7 +102,7 @@ const useUser = () => {
     return await fetchJson(baseUrl + 'users', fetchOptions);
   };
 
-  return {getUser, postUser, getUserName};
+  return {getUser, postUser, getUsername};
 };
 
 const useLogin = () => {
@@ -89,7 +125,7 @@ const useTag = () => {
     if (tagResult.length > 0) {
       return tagResult;
     } else {
-      throw new Error('No result');
+      throw new Error('No results');
     }
   };
   return {getTag};
